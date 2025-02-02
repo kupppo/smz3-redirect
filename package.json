@@ -1,0 +1,10 @@
+{
+  "name": "smz3-api",
+  "version": "1.0.0",
+  "description": "SMZ3 API wrapper",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "license": "MIT"
+}
