@@ -38,9 +38,25 @@ function parse(s, buf, offset) {
   return buf;
 }
 
-export async function POST(req) {
+const DEFAULT_SETTINGS = {
+  "smlogic": "normal",
+  "goal": "defeatboth",
+  "opentower": "sevencrystals",
+  "ganonvulnerable": "sevencrystals",
+  "opentourian": "fourbosses",
+  "swordlocation": "randomized",
+  "morphlocation": "randomized",
+  "keyshuffle": "none",
+  "seed": null,
+  "race": true,
+  "gamemode": "normal",
+  "players": 1,
+  "initialitems": "Boots"
+}
+
+async function generateSeed(opts) {
+  const settings = { ...DEFAULT_SETTINGS, opts }
   const BASE_URL = 'https://samus.link'
-  const settings = await req.json()
   const generateUrl = new URL('/api/randomizers/smz3/generate', BASE_URL)
   const gameReq = await fetch(generateUrl.toString(), {
     method: 'POST',
@@ -54,7 +70,26 @@ export async function POST(req) {
   const guid = data.guid
   const id = encode(guid)
   const seedUrl = new URL(`/seed/${id}`, BASE_URL)
-  return new Response(seedUrl.toString(), {
-    status: 307
+  return { ...data, seedUrl: seedUrl.toString() }
+}
+
+export async function GET() {
+  const seed = await generateSeed()
+  return new Response(seed.seedUrl, {
+    status: 307,
+    headers: {
+      Location: seed.seedUrl
+    }
+  })
+}
+
+export async function POST(req) {
+  const settings = await req.json()
+  const seed = await generateSeed(settings)
+  return new Response(seed.seedUrl, {
+    status: 307,
+    headers: {
+      Location: seed.seedUrl
+    }
   })
 }
