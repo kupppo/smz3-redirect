@@ -38,6 +38,9 @@ function parse(s, buf, offset) {
   return buf;
 }
 
+const INERTIA_USER_AGENT = 'Inertia/1.0 (Action="RollSeed") Contact=https://inertia.run'
+const isInertia = (agent) => agent === INERTIA_USER_AGENT
+
 const DEFAULT_SETTINGS = {
   "smlogic": "normal",
   "goal": "defeatboth",
@@ -73,23 +76,39 @@ async function generateSeed(opts) {
   return { ...data, seedUrl: seedUrl.toString() }
 }
 
-export async function GET() {
+export async function GET(req) {
   const seed = await generateSeed()
-  return new Response(seed.seedUrl, {
-    status: 307,
-    headers: {
-      Location: seed.seedUrl
-    }
-  })
+  const userAgent = req.headers.get('User-Agent')
+  if (isInertia(userAgent)) {
+    return Response.json({
+      url: seed.seedUrl,
+      message: `The seed is ready: ${seed.seedUrl}\n${seed.hash}`
+    })
+  } else {
+    return new Response(seed.seedUrl, {
+      status: 307,
+      headers: {
+        Location: seed.seedUrl
+      }
+    })
+  }
 }
 
 export async function POST(req) {
   const settings = await req.json()
   const seed = await generateSeed(settings)
-  return new Response(seed.seedUrl, {
-    status: 307,
-    headers: {
-      Location: seed.seedUrl
-    }
-  })
+  const userAgent = req.headers.get('User-Agent')
+  if (isInertia(userAgent)) {
+    return Response.json({
+      url: seed.seedUrl,
+      message: `The seed is ready: ${seed.seedUrl}. \n${seed.hash}`
+    })
+  } else {
+    return new Response(seed.seedUrl, {
+      status: 307,
+      headers: {
+        Location: seed.seedUrl
+      }
+    })
+  }
 }
