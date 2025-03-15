@@ -82,6 +82,7 @@ export async function GET(req) {
   if (isInertia(userAgent)) {
     return Response.json({
       url: seed.seedUrl,
+      hash: seed.hash,
       message: `The seed is ready: ${seed.seedUrl}\n${seed.hash}`
     })
   } else {
@@ -101,6 +102,7 @@ export async function POST(req) {
   if (isInertia(userAgent)) {
     return Response.json({
       url: seed.seedUrl,
+      hash: seed.hash,
       message: `The seed is ready: ${seed.seedUrl}. \n${seed.hash}`
     })
   } else {
